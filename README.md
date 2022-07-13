@@ -71,7 +71,7 @@ const promise = new Promise((resolve, reject) => {
 
 #### Состояния, в которых может находиться промис:
 
-![promise](promises-states.png)
+<img src="promises-states.png" alt="promise" width="500"/>
 Промис начинается с состояния ожидания (state: "pending"). Оно говорит о том, что он ещё не выполнен (результат undefined).
 
 Промис завершается после вызова resolve() или reject(). При этом его состояние переходит соответственно в выполнено (state: "fulfilled") или отклонено (state: "rejected").
@@ -309,4 +309,94 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 const element = <Welcome name="Алиса" />;
 root.render(element);
 ```
-Например, этот компонент выведет «Привет, Алиса» на страницу:
+
+Например, этот компонент выведет «Привет, Алиса» на страницу
+
+#### Извлечение компонентов
+
+```
+function Comment(props) {
+  return (
+    <div className="Comment">
+      <div className="UserInfo">
+        <img className="Avatar"
+          src={props.author.avatarUrl}
+          alt={props.author.name}
+        />
+        <div className="UserInfo-name">
+          {props.author.name}
+        </div>
+      </div>
+      <div className="Comment-text">
+        {props.text}
+      </div>
+      <div className="Comment-date">
+        {formatDate(props.date)}
+      </div>
+    </div>
+  );
+}
+```
+
+Для начала извлечём Avatar:
+
+```
+function Avatar(props) {
+  return (
+    <img className="Avatar"
+      src={props.user.avatarUrl}
+      alt={props.user.name}
+    />
+  );
+}
+```
+
+Компоненту Avatar незачем знать, что он рендерится внутри Comment. Поэтому мы дали его пропу чуть менее конкретное имя — user, а не author.
+
+**Пропсы следует называть так, чтобы они имели смысл в первую очередь с точки зрения самого компонента, а уже во вторую тех компонентов, которые его рендерят.**
+
+Теперь можно немножко упростить наш Comment:
+
+```
+function Comment(props) {
+  return (
+    <div className="Comment">
+      <div className="UserInfo">
+        <Avatar user={props.author} />
+        <div className="UserInfo-name">
+          {props.author.name}
+        </div>
+      </div>
+      <div className="Comment-text">
+        {props.text}
+      </div>
+      <div className="Comment-date">
+        {formatDate(props.date)}
+      </div>
+    </div>
+  );
+}
+```
+
+##### Пропсы можно только читать
+
+Компонент никогда не должен что-то записывать в свои пропсы — вне зависимости от того, функциональный он или классовый.
+
+Возьмём для примера функцию sum:
+
+```
+function sum(a, b) {
+  return a + b;
+}
+```
+
+Такие функции называют «чистыми», потому что они не меняют свои входные данные и предсказуемо возвращают один и тот же результат для одинаковых аргументов.
+
+А вот пример нечистой функции — она записывает данные в свои же аргументы:
+
+```
+function withdraw(account, amount) {
+  account.total -= amount;
+}
+```
+React-компоненты обязаны вести себя как чистые функции по отношению к своим пропсам.
